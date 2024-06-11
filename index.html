@@ -1,229 +1,308 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML File Manager</title>
+    <title>Lista de Arquivos do Google Drive</title>
+    <link rel="icon" href="https://img.icons8.com/ios-filled/50/000000/shopping-cart.png" type="image/png">
     <style>
+        /* Estilos CSS aqui */
+      
         body {
             font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
         }
 
-        #app {
-            width: 80%;
-            max-width: 800px;
-            background: white;
+        .container {
+            display: none;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            position: relative;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+        .login-container {
+            display: flex;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: auto;
+            
         }
 
-        #authorize-button, #signout-button {
-            padding: 10px 20px;
+        .login-container img {
+            width: 100%;
+            height: 100%;
             margin-bottom: 20px;
+        }
+
+        .login-container button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
             background-color: #007BFF;
             color: white;
-            border: none;
-            border-radius: 4px;
             cursor: pointer;
         }
 
-        #authorize-button:hover, #signout-button:hover {
-            background-color: #0056b3;
-        }
-
-        #search {
-            width: 100%;
-            padding: 10px;
+        h1 {
+            font-size: 24px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
 
-        #file-list {
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
 
-        #file-list li {
+        ul li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 10px;
-            border-bottom: 1px solid #ccc;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+        }
+
+        ul li div {
+            flex-grow: 1;
+        }
+
+        ul li button {
+            background: none;
+            border: none;
             cursor: pointer;
+            color: #007BFF;
+            padding: 0 10px;
         }
 
-        #file-list li:hover {
-            background-color: #f0f0f0;
-        }
-
-        #file-content {
-            width: 100%;
-            height: 200px;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            resize: none;
-        }
-
-        #file-input {
+        .input-group {
             display: none;
+            flex-direction: column;
         }
 
-        #add-file-button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
+        .input-group input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-group button {
+            padding: 10px;
             border: none;
             border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
             cursor: pointer;
         }
 
-        #add-file-button:hover {
-            background-color: #0056b3;
+        .add-button,
+        .show-all-button {
+            display: inline-block;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .add-button {
+            background-color: #28a745;
+        }
+
+        .edit-container,
+        .add-container {
+            display: none;
+            flex-direction: column;
+            margin-top: 10px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+        }
+
+        .edit-container input,
+        .add-container input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .edit-container button,
+        .add-container button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .edit-container.active,
+        .add-container.active {
+            display: flex;
+        }
+
+        .input-group-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .close-button {
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #007BFF;
+            margin-left: 90%;
+        }
+
+        .refresh-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #007BFF;
+        }
+
+        .highlight {
+            background-color: #ccffcc; /* Verde claro */
+        }
+
+        .checked-item span {
+            text-decoration: line-through;
+        }
+
+        .bold-item span {
+            font-weight: bold;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Gerenciador de Arquivos HTML</h1>
-        <button id="authorize-button">Authorize</button>
-        <button id="signout-button">Sign Out</button>
-        <input type="text" id="search" placeholder="Pesquisar arquivos...">
-        <ul id="file-list"></ul>
-        <textarea id="file-content" readonly></textarea>
-        <input type="file" id="file-input">
-        <button id="add-file-button">Adicionar Arquivo</button>
+
+    <div class="login-container" id="loginContainer">
+        <!-- Seu conteúdo de login aqui -->
+        <img src="https://github.com/PSilva1987/lista-de-mercado/blob/main/carrinho%20de%20compra.png?raw=true" alt="Ícone de Carrinho de Compras">
+
+        <button id="loginButton">Login com Google</button>
+
     </div>
-    <script src="https://apis.google.com/js/api.js"></script>
+
+   <div class="container" id="mainContainer">
+        <!-- Sua lista de arquivos aqui -->
+
+   </div>
+
+    
     <script>
-        let GoogleAuth;
-        const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+        // Constantes
+        const CLIENT_ID = '31014014092-va8fm725unj59q7ride9mgs6gn8ja13k.apps.googleusercontent.com'; // Substitua pelo seu Client ID do Google
+        const REDIRECT_URI = 'https://psilva1987.github.io/NEW_B.O.M/'; // Substitua pelo seu Redirect URI
+        const DRIVE_FOLDER_ID = '1ePTP97pgHTkXAZjLTZ8hPyc-CUxJGWKH'; // Substitua pela ID da pasta no Google Drive que você deseja listar
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const authorizeButton = document.getElementById('authorize-button');
-            const signoutButton = document.getElementById('signout-button');
-            const fileList = document.getElementById('file-list');
-            const fileContent = document.getElementById('file-content');
-            const searchInput = document.getElementById('search');
-            const fileInput = document.getElementById('file-input');
-            const addFileButton = document.getElementById('add-file-button');
-
-            gapi.load('client:auth2', () => {
-                gapi.client.init({
-                    'clientId': '31014014092-va8fm725unj59q7ride9mgs6gn8ja13k.apps.googleusercontent.com',
-                    'scope': SCOPE
-                }).then(() => {
-                    GoogleAuth = gapi.auth2.getAuthInstance();
-
-                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
-
-                    authorizeButton.onclick = handleAuthClick;
-                    signoutButton.onclick = handleSignoutClick;
-
-                    updateSigninStatus(GoogleAuth.isSignedIn.get());
-                });
-            });
-
-            function updateSigninStatus(isSignedIn) {
-                if (isSignedIn) {
-                    authorizeButton.style.display = 'none';
-                    signoutButton.style.display = 'block';
-                    listFiles();
-                } else {
-                    authorizeButton.style.display = 'block';
-                    signoutButton.style.display = 'none';
-                    fileList.innerHTML = '';
-                    fileContent.value = '';
-                }
-            }
-
-            function handleAuthClick() {
-                GoogleAuth.signIn();
-            }
-
-            function handleSignoutClick() {
-                GoogleAuth.signOut();
-            }
-
-            function listFiles() {
-                gapi.client.drive.files.list({
-                    'pageSize': 10,
-                    'fields': "nextPageToken, files(id, name)",
-                    'q': "mimeType='text/html'"
-                }).then((response) => {
-                    const files = response.result.files;
-                    if (files && files.length > 0) {
-                        fileList.innerHTML = '';
-                        files.forEach(file => {
-                            const li = document.createElement('li');
-                            li.textContent = file.name;
-                            li.addEventListener('click', () => {
-                                gapi.client.drive.files.get({
-                                    fileId: file.id,
-                                    alt: 'media'
-                                }).then((response) => {
-                                    fileContent.value = response.body;
-                                });
-                            });
-                            fileList.appendChild(li);
-                        });
-                    } else {
-                        fileList.innerHTML = '<li>No files found.</li>';
-                    }
-                });
-            }
-
-            searchInput.addEventListener('input', (e) => {
-                const filter = e.target.value.toLowerCase();
-                const items = fileList.getElementsByTagName('li');
-                Array.from(items).forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    if (text.includes(filter)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-
-            addFileButton.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', () => {
-                const file = fileInput.files[0];
-                if (file) {
-                    const metadata = {
-                        'name': file.name,
-                        'mimeType': 'text/html'
-                    };
-                    const form = new FormData();
-                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                    form.append('file', file);
-
-                    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                        method: 'POST',
-                        headers: new Headers({ 'Authorization': 'Bearer ' + GoogleAuth.currentUser.get().getAuthResponse().access_token }),
-                        body: form
-                    }).then(() => {
-                        listFiles();
-                    });
-                }
-            });
+        document.getElementById('loginButton').addEventListener('click', () => {
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
+            window.location.href = authUrl;
         });
+
+        // Função de manipulação de resposta de autenticação
+        function handleAuthResponse() {
+            // Se houver um token de acesso na URL
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = params.get('access_token');
+            if (accessToken) {
+                // Token de acesso disponível, continuar com a listagem de arquivos
+                loadFiles(accessToken);
+            } else {
+                console.log('Erro ao obter token de acesso');
+            }
+        }
+
+        // Função para carregar os arquivos da pasta especificada no Google Drive
+        function loadFiles(accessToken) {
+            // URL da API do Google Drive para listar arquivos
+            const url = `https://www.googleapis.com/drive/v3/files?q='${DRIVE_FOLDER_ID}'+in+parents&fields=files(id,name,mimeType)&access_token=${accessToken}`;
+
+            // Fazer solicitação GET para obter a lista de arquivos
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Função para exibir os arquivos na página
+                    displayFiles(data.files);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar arquivos:', error);
+                });
+        }
+
+        // Função para exibir os arquivos na página
+        function displayFiles(files) {
+            const container = document.getElementById('mainContainer');
+            const fileList = document.createElement('ul');
+
+            files.forEach(file => {
+                const listItem = document.createElement('li');
+                listItem.textContent = file.name;
+                fileList.appendChild(listItem);
+            });
+
+            container.appendChild(fileList);
+        }
+
+        // Redirecionar para o fluxo de autenticação do Google
+        function redirectToGoogleAuth() {
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=https://www.googleapis.com/auth/drive.readonly`;
+            window.location.href = authUrl;
+        }
+
+        // Executar a função de manipulação de resposta de autenticação quando a página carregar
+        window.onload = handleAuthResponse;
     </script>
 </body>
 </html>
