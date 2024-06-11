@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Arquivos do Google Drive</title>
+    <title>Lista de Mercado</title>
     <link rel="icon" href="https://img.icons8.com/ios-filled/50/000000/shopping-cart.png" type="image/png">
     <style>
-        /* Estilos CSS aqui */
-      
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -227,82 +225,540 @@
 <body>
 
     <div class="login-container" id="loginContainer">
-        <!-- Seu conteúdo de login aqui -->
         <img src="https://github.com/PSilva1987/lista-de-mercado/blob/main/carrinho%20de%20compra.png?raw=true" alt="Ícone de Carrinho de Compras">
 
-        <button id="loginButton">Login com Google</button>
-
+            <button id="loginButton">Login com Google</button>
     </div>
 
    <div class="container" id="mainContainer">
-        <!-- Sua lista de arquivos aqui -->
-
-   </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+          
+            th, td {
+                border: 1px solid #ddd;
+                padding: 15px;
+                text-align: left;
+            }
+            #inputData, #generateTableButton, #saveHTMLButton {
+                display: none; /* Oculta o conversor de dados e os botões inicialmente */
+            }
+            button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                margin: 10px 0;
+                border: none;
+                cursor: pointer;
+            }
+            button:hover {
+                opacity: 0.8;
+            }
+            #searchInput {
+                width: 100%;
+                padding: 12px 20px;
+                margin: 8px 0;
+                box-sizing: border-box;
+            }
+            .copy-icon {
+                cursor: pointer;
+            }
+    
+            table {
+          width: 100%;
+          max-height: 500px;
+          overflow-y: auto;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+          background-color: rgb(244, 247, 247);
+        }
+    
+            #itemsTable {
+          display: block;
+          overflow-y: auto;
+          height:100%; /* Ajuste a altura conforme necessário */
+          width: 100%;
+        }
+        #itemsTable thead {
+          position: sticky;
+          top: 0;
+          background: #f2f2f2;
+        }
+        .container {
+          max-width: 100%;
+          margin: 20px auto;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+          background-image: linear-gradient(#EFD80C, #f1efd9);
+          overflow-x: auto;
+          
+        }
+    
+        tr:nth-child(even) {
+          background-color: #f2f2f2;
+        }
+        tr:hover {
+          background-color: #ddd;
+        }
+    
+        table {
+          width: 100%;
+          max-height: 500px;
+          overflow-y: auto;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+          background-color: rgb(244, 247, 247);
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+          position: sticky;
+          top: 0;
+        }
+    
+        textarea{
+            width: 100%;
+            height: 20%;
+        }
+    
+         /* Configura a largura de cada coluna individualmente */
+         #itemsTable th:nth-child(1), #itemsTable td:nth-child(1) {
+          width: 10%; /* Ajuste a largura conforme necessário */
+        }
+        #itemsTable th:nth-child(2), #itemsTable td:nth-child(2) {
+          width: 10%; /* Ajuste a largura conforme necessário */
+        }
+        #itemsTable th:nth-child(3), #itemsTable td:nth-child(3) {
+          width: 20%; /* Ajuste a largura conforme necessário */
+        }
+        #itemsTable th:nth-child(4), #itemsTable td:nth-child(4) {
+          width: 60%; /* Ajuste a largura conforme necessário */
+        }
+        </style>
+    </head>
+    <body onload="hideConverter()">
+    
+    <button onclick="toggleConverter()">+</button> <!-- Botão para exibir/ocultar o conversor de dados -->
+    
+    <textarea id="inputData" rows="20" cols="50" oninput="generateTable()" autofocus>
+    Digite os dados aqui...
+    </textarea>
+    
+    
+     <!-- <button id="saveHTMLButton" onclick="saveHTML()">Salvar HTML</button> -->
+    
+    
+    
+    <div class="container">
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Pesquisar na tabela.."autofocus>
+    
+    <table id="componentTable">
+        <thead>
+      <tr>
+        <th>Item</th>
+        <th>Item Desc</th> 
+        <th>Component Item</th>
+        <th>Component Item Desc</th>
+        <th>Quantity</th>
+      </tr>
+    </thead>
+    </table>
+    
+    </div>
+    
+    <script>
+    var data = [];
+    
+    function toggleConverter() {
+        var converter = document.getElementById('inputData');
+        var saveHTMLButton = document.getElementById('saveHTMLButton');
+        if (converter.style.display === "none") {
+            converter.style.display = "block";
+            saveHTMLButton.style.display = "inline-block";
+            converter.focus();
+            // Posicionar o cursor na segunda linha
+            var position = converter.value.indexOf('\n') + 1;
+            if (position < 0) position = converter.value.length;
+            // Encontrar a segunda quebra de linha, caso haja texto na primeira linha
+            position = converter.value.indexOf('\n', position) + 1;
+            if (position <= 0) position = converter.value.length;
+            converter.setSelectionRange(position, position);
+        } else {
+            converter.style.display = "none";
+            saveHTMLButton.style.display = "none";
+        }
+    }
+    
+    
+    
+    
+    function hideConverter() {
+        var converter = document.getElementById('inputData');
+        var generateTableButton = document.getElementById('generateTableButton');
+        var saveHTMLButton = document.getElementById('saveHTMLButton');
+        converter.style.display = "none";
+        generateTableButton.style.display = "none";
+        saveHTMLButton.style.display = "none";
+    }
+    
+    function generateTable() {
+        var input = document.getElementById('inputData').value;
+        var lines = input.split('\n');
+        for (var i = 0; i < lines.length; i+=2) {
+            var parts1 = lines[i].split('\t');
+            var parts2 = lines[i+1].split('\t');
+            if (parts1.length === 1 && parts2.length === 4) {
+                data.push({
+                    "Item": parts1[0],
+                    "Item Desc": parts2[0],
+                    "Component Item": parts2[1],
+                    "Component Item Desc": parts2[2],
+                    "Quantity": parts2[3]
+                });
+            }
+        }
+    
+        var table = document.getElementById('componentTable');
+        for (var i = 0; i < data.length; i++) {
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            
+            cell1.innerHTML = data[i].Item;
+            cell2.innerHTML = data[i]["Item Desc"];
+            cell3.innerHTML = data[i]["Component Item"];
+            cell4.innerHTML = data[i]["Component Item Desc"];
+            cell5.innerHTML = data[i].Quantity;
+    
+            var copyIcon = document.createElement("i");
+            copyIcon.className = "fas fa-copy copy-icon";
+            copyIcon.title = "Copiar";
+            copyIcon.addEventListener("click", createCopyFunction(data[i]["Component Item"]));
+            cell3.appendChild(copyIcon);
+        }
+        saveHTML(); // Chamar saveHTML após gerar a tabela
+    }
+    
+    function createCopyFunction(text) {
+        return function() {
+            copyContent(text);
+        };
+    
+        
+    }
+    
+    function saveHTML() {
+        var html = document.documentElement.outerHTML;
+        var blob = new Blob([html], {type: 'text/html'});
+        var url = URL.createObjectURL(blob);
+    
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'tabela.html';
+        link.click();
+    }
+    
+    function searchTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("componentTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td");
+            for (j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        break;
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }       
+            }
+        }
+    }
+    
+    function copyContent(text) {
+        var tempInput = document.createElement("textarea");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+    }
+    
+    function saveHTML() {
+        var html = document.documentElement.outerHTML;
+        var blob = new Blob([html], {type: 'text/html'});
+        var url = URL.createObjectURL(blob);
+    
+        var fileName = data.length > 0 ? data[0].Item + '.html' : 'tabela.html'; // Usando o primeiro item da coluna "Item" como nome do arquivo, se disponível
+    
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        
+        reloadPage(); // Recarregar a página após salvar
+    }
+    
+    function reloadPage() {
+        window.location.reload();
+    }
+    
+    
+    </script>
+    
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome CDN -->
+    
+    </body>
+    </html>
+    
+       
+        
+    </div>
 
     
     <script>
-        // Constantes
-        const CLIENT_ID = '31014014092-va8fm725unj59q7ride9mgs6gn8ja13k.apps.googleusercontent.com'; // Substitua pelo seu Client ID do Google
-        const REDIRECT_URI = 'https://psilva1987.github.io/NEW_B.O.M/'; // Substitua pelo seu Redirect URI
-        const DRIVE_FOLDER_ID = '1ePTP97pgHTkXAZjLTZ8hPyc-CUxJGWKH'; // Substitua pela ID da pasta no Google Drive que você deseja listar
+         
+         
+        const CLIENT_ID = '31014014092-va8fm725unj59q7ride9mgs6gn8ja13k.apps.googleusercontent.com';
+        const REDIRECT_URI = 'https://psilva1987.github.io/NEW_B.O.M/';
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+        const SHEET_ID = '1ePTP97pgHTkXAZjLTZ8hPyc-CUxJGWKH';
+        const SHEET_NAME = 'Lista';
+        let ACCESS_TOKEN = null;
+        let selectedItem = null;
+        let showAll = false;
+        let fullItemList = [];
 
         document.getElementById('loginButton').addEventListener('click', () => {
             const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
             window.location.href = authUrl;
         });
 
-        // Função de manipulação de resposta de autenticação
         function handleAuthResponse() {
-            // Se houver um token de acesso na URL
             const params = new URLSearchParams(window.location.hash.substring(1));
             const accessToken = params.get('access_token');
+
             if (accessToken) {
-                // Token de acesso disponível, continuar com a listagem de arquivos
-                loadFiles(accessToken);
+                ACCESS_TOKEN = accessToken;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                loadItems();
             } else {
                 console.log('Erro ao obter token de acesso');
             }
         }
 
-        // Função para carregar os arquivos da pasta especificada no Google Drive
-        function loadFiles(accessToken) {
-            // URL da API do Google Drive para listar arquivos
-            const url = `https://www.googleapis.com/drive/v3/files?q='${DRIVE_FOLDER_ID}'+in+parents&fields=files(id,name,mimeType)&access_token=${accessToken}`;
+        async function fetchWithTokenRefresh(url, options = {}) {
+            if (!ACCESS_TOKEN) {
+                console.error('Token de acesso não disponível');
+                return null;
+            }
 
-            // Fazer solicitação GET para obter a lista de arquivos
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    // Função para exibir os arquivos na página
-                    displayFiles(data.files);
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar arquivos:', error);
-                });
+            if (!options.headers) {
+                options.headers = {};
+            }
+            options.headers['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+
+            let response = await fetch(url, options);
+
+            if (response.status === 401) {
+                // Token expirado, redirecionar para login
+                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=${SCOPES}`;
+                window.location.href = authUrl;
+            }
+
+            return response;
         }
 
-        // Função para exibir os arquivos na página
-        function displayFiles(files) {
-            const container = document.getElementById('mainContainer');
-            const fileList = document.createElement('ul');
+        async function loadItems() {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A2:C`;
+            const response = await fetchWithTokenRefresh(url);
 
-            files.forEach(file => {
+            if (response && response.ok) {
+                const data = await response.json();
+                fullItemList = data.values || [];
+                const filteredItems = showAll ? fullItemList : fullItemList.filter(item => parseInt(item[1], 10) > 0);
+                displayItems(filteredItems);
+            } else {
+                console.error('Erro ao carregar itens');
+            }
+        }
+
+        function displayItems(items) {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
+            items.forEach((item, index) => {
                 const listItem = document.createElement('li');
-                listItem.textContent = file.name;
-                fileList.appendChild(listItem);
+                listItem.innerHTML = `
+                    <input type="checkbox" onchange="toggleHighlight(this, ${index})">
+                    <div class="bold-item">
+                        <span>${item[0]}</span> - <span>${item[1]}</span> - <span>${item[2]}</span>
+                    </div>
+                    <button onclick="editItem(${index})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                `;
+                itemList.appendChild(listItem);
             });
-
-            container.appendChild(fileList);
         }
 
-        // Redirecionar para o fluxo de autenticação do Google
-        function redirectToGoogleAuth() {
-            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=https://www.googleapis.com/auth/drive.readonly`;
-            window.location.href = authUrl;
+        function toggleHighlight(checkbox, index) {
+            const listItem = checkbox.parentElement;
+            if (checkbox.checked) {
+                listItem.classList.add('highlight');
+                listItem.querySelector('div').classList.add('checked-item');
+            } else {
+                listItem.classList.remove('highlight');
+                listItem.querySelector('div').classList.remove('checked-item');
+            }
         }
 
-        // Executar a função de manipulação de resposta de autenticação quando a página carregar
+        function openAddContainer() {
+            document.getElementById('addContainer').classList.add('active');
+        }
+
+        function closeAddContainer() {
+            document.getElementById('addContainer').classList.remove('active');
+        }
+
+        function showAllItems() {
+            showAll = true;
+            loadItems();
+        }
+
+        function editItem(index) {
+            const realIndex = getRealIndex(index); // Obter o índice real do item
+            if (realIndex !== -1) {
+                const item = fullItemList[realIndex];
+                selectedItem = realIndex;
+                document.getElementById('editItemInput').value = item[0];
+                document.getElementById('editQuantityInput').value = item[1];
+                document.getElementById('editLocationInput').value = item[2];
+                document.getElementById('editContainer').classList.add('active');
+            }
+        }
+
+        function getRealIndex(filteredIndex) {
+            // Mapear o índice filtrado para o índice real
+            if (showAll) {
+                return filteredIndex;
+            } else {
+                let count = 0;
+                for (let i = 0; i < fullItemList.length; i++) {
+                    if (parseInt(fullItemList[i][1], 10) > 0) {
+                        if (count === filteredIndex) {
+                            return i;
+                        }
+                        count++;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        async function updateItem() {
+            const item = document.getElementById('editItemInput').value;
+            const quantity = document.getElementById('editQuantityInput').value;
+            const location = document.getElementById('editLocationInput').value;
+
+            if (item && quantity && location && selectedItem !== null) {
+                const rowIndex = selectedItem + 2; // Linha na planilha (começa em 2 porque os dados começam na linha 2)
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${rowIndex}:C${rowIndex}?valueInputOption=USER_ENTERED`;
+                const body = JSON.stringify({
+                    values: [[item, quantity, location]]
+                });
+
+                const response = await fetchWithTokenRefresh(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body
+                });
+
+                if (response && response.ok) {
+                    loadItems();
+                    closeEditContainer();
+                } else {
+                    console.error('Erro ao atualizar item');
+                }
+            } else {
+                alert('Preencha todos os campos');
+            }
+        }
+
+        function closeEditContainer() {
+            document.getElementById('editContainer').classList.remove('active');
+            loadItems(); // Mostrar todos os itens após fechar o contêiner de edição
+        }
+
+         async function addItem() {
+            const item = document.getElementById('addItemInput').value;
+            const quantity = document.getElementById('addQuantityInput').value;
+            const location = document.getElementById('addLocationInput').value;
+
+            if (item && quantity && location) {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A1:C1:append?valueInputOption=USER_ENTERED`;
+                const body = JSON.stringify({
+                    values: [[item, quantity, location]]
+                });
+
+                const response = await fetchWithTokenRefresh(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body
+                });
+
+                if (response && response.ok) {
+                    document.getElementById('addItemInput').value = '';
+                    document.getElementById('addQuantityInput').value = '';
+                    document.getElementById('addLocationInput').value = '';
+                    closeAddContainer();
+                    loadItems(); // Recarrega os itens após a adição
+                } else {
+                    console.error('Erro ao adicionar item');
+                }
+            } else {
+                alert('Preencha todos os campos');
+            }
+        }
+
+
         window.onload = handleAuthResponse;
+
+        function filterItems() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('#itemList li');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>
