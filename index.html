@@ -1,297 +1,228 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML File Manager</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
         }
-      
-        th, td {
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: left;
+
+        #app {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
-        #inputData, #generateTableButton, #saveHTMLButton {
-            display: none; /* Oculta o conversor de dados e os botões inicialmente */
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
+
+        #authorize-button, #signout-button {
+            display: none;
             padding: 10px 20px;
-            margin: 10px 0;
+            margin-bottom: 20px;
+            background-color: #007BFF;
+            color: white;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
         }
-        button:hover {
-            opacity: 0.8;
+
+        #authorize-button:hover, #signout-button:hover {
+            background-color: #0056b3;
         }
-        #searchInput {
+
+        #search {
             width: 100%;
-            padding: 12px 20px;
-            margin: 8px 0;
-            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-        .copy-icon {
+
+        #file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #file-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
             cursor: pointer;
         }
 
-        table {
-      width: 100%;
-      max-height: 500px;
-      overflow-y: auto;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background-color: rgb(244, 247, 247);
-    }
+        #file-list li:hover {
+            background-color: #f0f0f0;
+        }
 
-        #itemsTable {
-      display: block;
-      overflow-y: auto;
-      height:100%; /* Ajuste a altura conforme necessário */
-      width: 100%;
-    }
-    #itemsTable thead {
-      position: sticky;
-      top: 0;
-      background: #f2f2f2;
-    }
-    .container {
-      max-width: 100%;
-      margin: 20px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      background-image: linear-gradient(#EFD80C, #f1efd9);
-      overflow-x: auto;
-      
-    }
+        #file-content {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+        }
 
-    tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-    tr:hover {
-      background-color: #ddd;
-    }
+        #file-input {
+            display: none;
+        }
 
-    table {
-      width: 100%;
-      max-height: 500px;
-      overflow-y: auto;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background-color: rgb(244, 247, 247);
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-      position: sticky;
-      top: 0;
-    }
+        #add-file-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-    textarea{
-        width: 100%;
-        height: 20%;
-    }
-
-     /* Configura a largura de cada coluna individualmente */
-     #itemsTable th:nth-child(1), #itemsTable td:nth-child(1) {
-      width: 10%; /* Ajuste a largura conforme necessário */
-    }
-    #itemsTable th:nth-child(2), #itemsTable td:nth-child(2) {
-      width: 10%; /* Ajuste a largura conforme necessário */
-    }
-    #itemsTable th:nth-child(3), #itemsTable td:nth-child(3) {
-      width: 20%; /* Ajuste a largura conforme necessário */
-    }
-    #itemsTable th:nth-child(4), #itemsTable td:nth-child(4) {
-      width: 60%; /* Ajuste a largura conforme necessário */
-    }
+        #add-file-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
-<body onload="hideConverter()">
+<body>
+    <div id="app">
+        <h1>Gerenciador de Arquivos HTML</h1>
+        <button id="authorize-button">Authorize</button>
+        <button id="signout-button">Sign Out</button>
+        <input type="text" id="search" placeholder="Pesquisar arquivos...">
+        <ul id="file-list"></ul>
+        <textarea id="file-content" readonly></textarea>
+        <input type="file" id="file-input">
+        <button id="add-file-button">Adicionar Arquivo</button>
+    </div>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        let GoogleAuth;
+        const SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
-<button onclick="toggleConverter()">+</button> <!-- Botão para exibir/ocultar o conversor de dados -->
+        document.addEventListener('DOMContentLoaded', () => {
+            const authorizeButton = document.getElementById('authorize-button');
+            const signoutButton = document.getElementById('signout-button');
+            const fileList = document.getElementById('file-list');
+            const fileContent = document.getElementById('file-content');
+            const searchInput = document.getElementById('search');
+            const fileInput = document.getElementById('file-input');
+            const addFileButton = document.getElementById('add-file-button');
 
-<textarea id="inputData" rows="20" cols="50" oninput="generateTable()" autofocus>
-Digite os dados aqui...
-</textarea>
+            gapi.load('client:auth2', () => {
+                gapi.client.init({
+                    'clientId': 'YOUR_CLIENT_ID',
+                    'scope': SCOPE
+                }).then(() => {
+                    GoogleAuth = gapi.auth2.getAuthInstance();
 
+                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
 
- <!-- <button id="saveHTMLButton" onclick="saveHTML()">Salvar HTML</button> -->
+                    authorizeButton.onclick = handleAuthClick;
+                    signoutButton.onclick = handleSignoutClick;
 
-
-
-<div class="container">
-    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Pesquisar na tabela.."autofocus>
-
-<table id="componentTable">
-    <thead>
-  <tr>
-    <th>Item</th>
-    <th>Item Desc</th> 
-    <th>Component Item</th>
-    <th>Component Item Desc</th>
-    <th>Quantity</th>
-  </tr>
-</thead>
-</table>
-
-</div>
-
-<script>
-var data = [];
-
-function toggleConverter() {
-    var converter = document.getElementById('inputData');
-    var saveHTMLButton = document.getElementById('saveHTMLButton');
-    if (converter.style.display === "none") {
-        converter.style.display = "block";
-        saveHTMLButton.style.display = "inline-block";
-        converter.focus();
-        // Posicionar o cursor na segunda linha
-        var position = converter.value.indexOf('\n') + 1;
-        if (position < 0) position = converter.value.length;
-        // Encontrar a segunda quebra de linha, caso haja texto na primeira linha
-        position = converter.value.indexOf('\n', position) + 1;
-        if (position <= 0) position = converter.value.length;
-        converter.setSelectionRange(position, position);
-    } else {
-        converter.style.display = "none";
-        saveHTMLButton.style.display = "none";
-    }
-}
-
-
-
-
-function hideConverter() {
-    var converter = document.getElementById('inputData');
-    var generateTableButton = document.getElementById('generateTableButton');
-    var saveHTMLButton = document.getElementById('saveHTMLButton');
-    converter.style.display = "none";
-    generateTableButton.style.display = "none";
-    saveHTMLButton.style.display = "none";
-}
-
-function generateTable() {
-    var input = document.getElementById('inputData').value;
-    var lines = input.split('\n');
-    for (var i = 0; i < lines.length; i+=2) {
-        var parts1 = lines[i].split('\t');
-        var parts2 = lines[i+1].split('\t');
-        if (parts1.length === 1 && parts2.length === 4) {
-            data.push({
-                "Item": parts1[0],
-                "Item Desc": parts2[0],
-                "Component Item": parts2[1],
-                "Component Item Desc": parts2[2],
-                "Quantity": parts2[3]
+                    updateSigninStatus(GoogleAuth.isSignedIn.get());
+                });
             });
-        }
-    }
 
-    var table = document.getElementById('componentTable');
-    for (var i = 0; i < data.length; i++) {
-        var row = table.insertRow(-1);
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-        var cell4 = row.insertCell(3);
-        var cell5 = row.insertCell(4);
-        
-        cell1.innerHTML = data[i].Item;
-        cell2.innerHTML = data[i]["Item Desc"];
-        cell3.innerHTML = data[i]["Component Item"];
-        cell4.innerHTML = data[i]["Component Item Desc"];
-        cell5.innerHTML = data[i].Quantity;
-
-        var copyIcon = document.createElement("i");
-        copyIcon.className = "fas fa-copy copy-icon";
-        copyIcon.title = "Copiar";
-        copyIcon.addEventListener("click", createCopyFunction(data[i]["Component Item"]));
-        cell3.appendChild(copyIcon);
-    }
-    saveHTML(); // Chamar saveHTML após gerar a tabela
-}
-
-function createCopyFunction(text) {
-    return function() {
-        copyContent(text);
-    };
-
-    
-}
-
-function saveHTML() {
-    var html = document.documentElement.outerHTML;
-    var blob = new Blob([html], {type: 'text/html'});
-    var url = URL.createObjectURL(blob);
-
-    var link = document.createElement('a');
-    link.href = url;
-    link.download = 'tabela.html';
-    link.click();
-}
-
-function searchTable() {
-    var input, filter, table, tr, td, i, j, txtValue;
-    input = document.getElementById("searchInput");
-    filter = input.value.toUpperCase();
-    table = document.getElementById("componentTable");
-    tr = table.getElementsByTagName("tr");
-    for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td");
-        for (j = 0; j < td.length; j++) {
-            if (td[j]) {
-                txtValue = td[j].textContent || td[j].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                    break;
+            function updateSigninStatus(isSignedIn) {
+                if (isSignedIn) {
+                    authorizeButton.style.display = 'none';
+                    signoutButton.style.display = 'block';
+                    listFiles();
                 } else {
-                    tr[i].style.display = "none";
+                    authorizeButton.style.display = 'block';
+                    signoutButton.style.display = 'none';
                 }
-            }       
-        }
-    }
-}
+            }
 
-function copyContent(text) {
-    var tempInput = document.createElement("textarea");
-    tempInput.value = text;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempInput);
-}
+            function handleAuthClick() {
+                GoogleAuth.signIn();
+            }
 
-function saveHTML() {
-    var html = document.documentElement.outerHTML;
-    var blob = new Blob([html], {type: 'text/html'});
-    var url = URL.createObjectURL(blob);
+            function handleSignoutClick() {
+                GoogleAuth.signOut();
+            }
 
-    var fileName = data.length > 0 ? data[0].Item + '.html' : 'tabela.html'; // Usando o primeiro item da coluna "Item" como nome do arquivo, se disponível
+            function listFiles() {
+                gapi.client.drive.files.list({
+                    'pageSize': 10,
+                    'fields': "nextPageToken, files(id, name)",
+                    'q': "mimeType='text/html'"
+                }).then((response) => {
+                    const files = response.result.files;
+                    if (files && files.length > 0) {
+                        fileList.innerHTML = '';
+                        files.forEach(file => {
+                            const li = document.createElement('li');
+                            li.textContent = file.name;
+                            li.addEventListener('click', () => {
+                                gapi.client.drive.files.get({
+                                    fileId: file.id,
+                                    alt: 'media'
+                                }).then((response) => {
+                                    fileContent.value = response.body;
+                                });
+                            });
+                            fileList.appendChild(li);
+                        });
+                    } else {
+                        fileList.innerHTML = '<li>No files found.</li>';
+                    }
+                });
+            }
 
-    var link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    
-    reloadPage(); // Recarregar a página após salvar
-}
+            searchInput.addEventListener('input', (e) => {
+                const filter = e.target.value.toLowerCase();
+                const items = fileList.getElementsByTagName('li');
+                Array.from(items).forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
 
-function reloadPage() {
-    window.location.reload();
-}
+            addFileButton.addEventListener('click', () => {
+                fileInput.click();
+            });
 
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    const metadata = {
+                        'name': file.name,
+                        'mimeType': 'text/html'
+                    };
+                    const form = new FormData();
+                    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                    form.append('file', file);
 
-</script>
-
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome CDN -->
-
+                    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                        method: 'POST',
+                        headers: new Headers({ 'Authorization': 'Bearer ' + GoogleAuth.currentUser.get().getAuthResponse().access_token }),
+                        body: form
+                    }).then(() => {
+                        listFiles();
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
