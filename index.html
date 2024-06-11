@@ -26,7 +26,6 @@
         }
 
         #authorize-button, #signout-button {
-            display: none;
             padding: 10px 20px;
             margin-bottom: 20px;
             background-color: #007BFF;
@@ -146,6 +145,8 @@
                 } else {
                     authorizeButton.style.display = 'block';
                     signoutButton.style.display = 'none';
+                    fileList.innerHTML = '';
+                    fileContent.value = '';
                 }
             }
 
